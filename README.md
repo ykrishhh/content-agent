@@ -92,6 +92,100 @@ content-agent/
 └── requirements.txt         # Dependencies
 ```
 
+### Content Pipeline Flow
+
+```mermaid
+flowchart LR
+    R[Research] --> G[Generate]
+    G --> O[Optimize]
+    O --> S[Schedule]
+    S --> P[Publish]
+
+    subgraph Research
+        R1[DuckDuckGo] & R2[Reddit API]
+    end
+
+    subgraph Generate
+        G1[Templates + AI]
+    end
+
+    subgraph Optimize
+        O1[SEO Scorer] & O2[Readability Check]
+    end
+
+    subgraph Schedule
+        S1[SQLite Queue] & S2[Optimal Time]
+    end
+
+    subgraph Publish
+        P1[GitHub] & P2[LinkedIn] & P3[Instagram] & P4[Email]
+    end
+```
+
+### System Architecture
+
+```mermaid
+graph TB
+    subgraph Core["Core Engine"]
+        Agent[agent.py - Orchestrator]
+        Pipeline[content_pipeline.py]
+        Generator[content_generator.py]
+        SEO[seo_optimizer.py]
+        Research[topic_researcher.py]
+        DB[(SQLite)]
+    end
+
+    subgraph Platforms["Platform Integrations"]
+        GH[GitHub Client]
+        TG[Telegram Client]
+        EM[Email Client]
+        LI[LinkedIn Client]
+        IG[Instagram Client]
+        Pub[publisher.py]
+    end
+
+    subgraph Interfaces["User Interfaces"]
+        Dash[Web Dashboard - Flask]
+        Bot[Telegram Bot]
+        Sched[Scheduler - Cron]
+    end
+
+    Dash & Bot & Sched --> Agent
+    Agent --> Pipeline --> Research & Generator & SEO
+    Research --> DB
+    Generator --> SEO
+    SEO --> Pub
+    Pub --> GH & TG & EM & LI & IG
+```
+
+### Data Flow Diagram
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Dashboard
+    participant Agent
+    participant Research
+    participant Generator
+    participant SEO
+    participant Publisher
+    participant Platform
+
+    User->>Dashboard: Add topic
+    Dashboard->>Agent: Queue topic
+    Agent->>Research: Fetch trends
+    Research-->>Agent: Topic data
+    Agent->>Generator: Create content
+    Generator-->>Agent: Draft posts
+    Agent->>SEO: Score & optimize
+    SEO-->>Agent: Optimized content
+    Agent->>Publisher: Dispatch to platforms
+    Publisher->>Platform: Publish via API
+    Platform-->>Publisher: Confirmation
+    Publisher-->>Agent: Status update
+    Agent-->>Dashboard: Notify completion
+```
+
 ## Dashboard
 
 The web dashboard gives you a full overview:
