@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Content Agent — Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">
+            <span class="logo-icon">&#9889;</span>
+            <span class="logo-text">ContentAgent</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/" class="active">&#9632; Dashboard</a></li>
+            <li><a href="/topics">&#9733; Topics</a></li>
+            <li><a href="/posts">&#9782; Calendar</a></li>
+            <li><a href="/analytics">&#9783; Analytics</a></li>
+            <li><a href="/settings">&#9881; Settings</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <span class="status-dot online"></span> Bot Active
+        </div>
+    </nav>
+
+    <main class="content">
+        <header class="page-header">
+            <h1>Dashboard</h1>
+            <span class="header-date">{{ now.strftime('%B %d, %Y') }}</span>
+        </header>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">{{ total_topics }}</div>
+                <div class="stat-label">Total Topics</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ total_posts }}</div>
+                <div class="stat-label">Total Posts</div>
+            </div>
+            <div class="stat-card accent">
+                <div class="stat-value">{{ published }}</div>
+                <div class="stat-label">Published</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ pending_topics }}</div>
+                <div class="stat-label">Pending Topics</div>
+            </div>
+            <div class="stat-card highlight">
+                <div class="stat-value">{{ avg_engagement }}</div>
+                <div class="stat-label">Avg Engagement</div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <!-- Upcoming Posts -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Upcoming Posts</h2>
+                    <a href="/posts" class="card-link">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if upcoming %}
+                    <div class="post-list">
+                        {% for post in upcoming %}
+                        <div class="post-item">
+                            <div class="post-info">
+                                <span class="post-title">{{ post['title'] }}</span>
+                                <span class="post-meta">
+                                    {{ post['platform'] }} &middot;
+                                    {% if post['scheduled_at'] %}
+                                    {{ post['scheduled_at'][:16].replace('T', ' ') }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <span class="badge badge-{{ post['status'] }}">{{ post['status'] }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="empty-state">No upcoming posts. Add topics to get started.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Platform Stats -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Platform Stats</h2>
+                </div>
+                <div class="card-body">
+                    {% if platform_stats %}
+                    <div class="platform-list">
+                        {% for stat in platform_stats %}
+                        <div class="platform-row">
+                            <span class="platform-name">{{ stat['platform']|capitalize }}</span>
+                            <div class="platform-bar-wrap">
+                                <div class="platform-bar"
+                                     style="width: {{ (stat['published'] / stat['total'] * 100) if stat['total'] > 0 else 0 }}%">
+                                </div>
+                            </div>
+                            <span class="platform-count">{{ stat['published'] }}/{{ stat['total'] }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="empty-state">No platform data yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Recent Activity</h2>
+            </div>
+            <div class="card-body">
+                {% if recent %}
+                <div class="activity-list">
+                    {% for item in recent %}
+                    <div class="activity-item">
+                        <span class="activity-dot"></span>
+                        <div class="activity-content">
+                            <span class="activity-action">{{ item['action'] }}</span>
+                            {% if item['details'] %}
+                            <span class="activity-details"> — {{ item['details'] }}</span>
+                            {% endif %}
+                        </div>
+                        <span class="activity-time">{{ item['timestamp'][:16].replace('T', ' ') }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="empty-state">No activity yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</body>
+</html>

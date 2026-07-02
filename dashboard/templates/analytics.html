@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics — AI Content Agent</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">
+            <span class="logo-icon">&#9889;</span>
+            <span class="logo-text">ContentAgent</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">&#9632; Dashboard</a></li>
+            <li><a href="/topics">&#9733; Topics</a></li>
+            <li><a href="/posts">&#9782; Calendar</a></li>
+            <li><a href="/analytics" class="active">&#9783; Analytics</a></li>
+            <li><a href="/settings">&#9881; Settings</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <span class="status-dot online"></span> Bot Active
+        </div>
+    </nav>
+
+    <main class="content">
+        <header class="page-header">
+            <h1>Analytics</h1>
+        </header>
+
+        <!-- Summary Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">{{ total_topics }}</div>
+                <div class="stat-label">Total Topics</div>
+            </div>
+            <div class="stat-card accent">
+                <div class="stat-value">{{ topics_with_posts }}</div>
+                <div class="stat-label">Topics with Posts</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">
+                    {{ ((topics_with_posts / total_topics * 100)|round|int) if total_topics > 0 else 0 }}%
+                </div>
+                <div class="stat-label">Conversion Rate</div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <!-- Platform Performance -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Platform Performance</h2>
+                </div>
+                <div class="card-body">
+                    {% if platform_data %}
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Platform</th>
+                                    <th>Total</th>
+                                    <th>Published</th>
+                                    <th>Engagement</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in platform_data %}
+                                <tr>
+                                    <td><strong>{{ p['platform']|capitalize }}</strong></td>
+                                    <td>{{ p['total'] }}</td>
+                                    <td>{{ p['published'] }}</td>
+                                    <td>{{ p['total_engagement']|round(1) if p['total_engagement'] else '0' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="empty-state">No platform data yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Daily Posts (Last 30 Days) -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Posts per Day (30d)</h2>
+                </div>
+                <div class="card-body">
+                    {% if daily_posts %}
+                    <div class="chart-bars">
+                        {% set max_count = daily_posts|map(attribute='cnt')|max %}
+                        {% for day in daily_posts %}
+                        <div class="chart-row">
+                            <span class="chart-label">{{ day['day'][-5:] }}</span>
+                            <div class="chart-bar-wrap">
+                                <div class="chart-bar" style="width: {{ (day['cnt'] / max_count * 100) if max_count > 0 else 0 }}%"></div>
+                            </div>
+                            <span class="chart-value">{{ day['cnt'] }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="empty-state">No posts in the last 30 days.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Posts -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Top Posts by Engagement</h2>
+            </div>
+            <div class="card-body">
+                {% if top_posts %}
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Topic</th>
+                                <th>Platform</th>
+                                <th>Engagement</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for post in top_posts %}
+                            <tr>
+                                <td><strong>{{ post['title'] }}</strong></td>
+                                <td class="text-muted">{{ post['topic_title'] or '—' }}</td>
+                                <td><span class="badge badge-platform">{{ post['platform'] }}</span></td>
+                                <td class="text-accent">{{ post['engagement_score']|round(1) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="empty-state">No published posts yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</body>
+</html>

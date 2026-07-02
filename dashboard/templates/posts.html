@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Calendar — AI Content Agent</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .cal-header {
+            background: var(--bg-secondary);
+            padding: 10px 4px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+        .cal-day {
+            background: var(--bg-primary);
+            min-height: 100px;
+            padding: 6px 8px;
+            position: relative;
+        }
+        .cal-day.other-month { opacity: 0.35; }
+        .cal-day.today { background: var(--accent-dim); }
+        .cal-day-num {
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+        }
+        .cal-day.today .cal-day-num {
+            color: var(--accent);
+        }
+        .cal-post {
+            font-size: 0.65rem;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .cal-post.draft { background: var(--bg-tertiary); color: var(--text-secondary); }
+        .cal-post.scheduled { background: var(--accent-dim); color: var(--accent); }
+        .cal-post.published { background: var(--green-dim); color: var(--green); }
+
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .calendar-nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 1.2rem;
+            padding: 4px 8px;
+        }
+        .calendar-nav a:hover { color: var(--text-primary); }
+
+        .draft-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .draft-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">
+            <span class="logo-icon">&#9889;</span>
+            <span class="logo-text">ContentAgent</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">&#9632; Dashboard</a></li>
+            <li><a href="/topics">&#9733; Topics</a></li>
+            <li><a href="/posts" class="active">&#9782; Calendar</a></li>
+            <li><a href="/analytics">&#9783; Analytics</a></li>
+            <li><a href="/settings">&#9881; Settings</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <span class="status-dot online"></span> Bot Active
+        </div>
+    </nav>
+
+    <main class="content">
+        <header class="page-header">
+            <div class="calendar-nav">
+                <a href="/posts?year={{ prev_year }}&month={{ prev_month }}">&#9664;</a>
+                <h1>{{ month_name }}</h1>
+                <a href="/posts?year={{ next_year }}&month={{ next_month }}">&#9654;</a>
+            </div>
+        </header>
+
+        <div class="grid-2">
+            <!-- Calendar -->
+            <div class="card">
+                <div class="card-body" style="padding: 0;">
+                    <div class="calendar-grid">
+                        {% for day in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}
+                        <div class="cal-header">{{ day }}</div>
+                        {% endfor %}
+
+                        {% set first_weekday = (now.replace(year=year, month=month, day=1).weekday()) %}
+                        {% set days_in_month = 31 if month in [1,3,5,7,8,10,12] else (29 if month==2 else 30) %}
+                        {% set start_day = (now.replace(year=year, month=month, day=1).weekday()) %}
+
+                        {# Fill leading empty cells #}
+                        {% for _ in range(start_day) %}
+                        <div class="cal-day other-month"><div class="cal-day-num">&nbsp;</div></div>
+                        {% endfor %}
+
+                        {% for day in range(1, days_in_month + 1) %}
+                        <div class="cal-day {{ 'today' if day == today and month == now.month and year == now.year else '' }}">
+                            <div class="cal-day-num">{{ day }}</div>
+                            {% if day in posts_by_day %}
+                            {% for post in posts_by_day[day] %}
+                            <div class="cal-post {{ post['status'] }}" title="{{ post['title'] }}">
+                                {{ post['title'][:15] }}
+                            </div>
+                            {% endfor %}
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+
+                        {# Fill trailing empty cells #}
+                        {% set total_cells = start_day + days_in_month %}
+                        {% for _ in range(7 - (total_cells % 7) if total_cells % 7 != 0 else 0) %}
+                        <div class="cal-day other-month"><div class="cal-day-num">&nbsp;</div></div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Draft Posts -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Draft Posts</h2>
+                </div>
+                <div class="card-body">
+                    {% if draft_posts %}
+                    <div class="draft-list">
+                        {% for post in draft_posts %}
+                        <div class="draft-item">
+                            <div>
+                                <strong class="text-sm">{{ post['title'] }}</strong>
+                                <div class="text-xs text-muted">
+                                    {{ post['platform'] }} &middot;
+                                    {{ post['created_at'][:10] }}
+                                </div>
+                            </div>
+                            <span class="badge badge-draft">draft</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="empty-state">No draft posts.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

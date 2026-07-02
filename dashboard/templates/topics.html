@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topics — AI Content Agent</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">
+            <span class="logo-icon">&#9889;</span>
+            <span class="logo-text">ContentAgent</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">&#9632; Dashboard</a></li>
+            <li><a href="/topics" class="active">&#9733; Topics</a></li>
+            <li><a href="/posts">&#9782; Calendar</a></li>
+            <li><a href="/analytics">&#9783; Analytics</a></li>
+            <li><a href="/settings">&#9881; Settings</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <span class="status-dot online"></span> Bot Active
+        </div>
+    </nav>
+
+    <main class="content">
+        <header class="page-header">
+            <h1>Topic Queue</h1>
+            <span class="header-date">{{ topics|length }} topics total</span>
+        </header>
+
+        <!-- Add Topic Form -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Add New Topic</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" class="topic-form">
+                    <div class="form-row">
+                        <div class="form-group flex-2">
+                            <label for="title">Title</label>
+                            <input type="text" id="title" name="title" placeholder="Enter topic title..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="platform">Platform</label>
+                            <select id="platform" name="platform">
+                                <option value="all">All Platforms</option>
+                                <option value="twitter">Twitter/X</option>
+                                <option value="linkedin">LinkedIn</option>
+                                <option value="instagram">Instagram</option>
+                                <option value="email">Email</option>
+                                <option value="blog">Blog</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group flex-2">
+                            <label for="description">Description</label>
+                            <textarea id="description" name="description" rows="2"
+                                      placeholder="Brief description or notes..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="tags">Tags</label>
+                            <input type="text" id="tags" name="tags" placeholder="comma,separated">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Topic</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Topics List -->
+        <div class="card">
+            <div class="card-header">
+                <h2>All Topics</h2>
+            </div>
+            <div class="card-body">
+                {% if topics %}
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Platform</th>
+                                <th>Status</th>
+                                <th>Tags</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for topic in topics %}
+                            <tr>
+                                <td class="text-muted">#{{ topic['id'] }}</td>
+                                <td>
+                                    <strong>{{ topic['title'] }}</strong>
+                                    {% if topic['description'] %}
+                                    <br><span class="text-muted text-sm">{{ topic['description'][:60] }}</span>
+                                    {% endif %}
+                                </td>
+                                <td><span class="badge badge-platform">{{ topic['platform'] }}</span></td>
+                                <td>
+                                    <form method="POST" action="/topics/{{ topic['id'] }}/status" class="inline-form">
+                                        <select name="status" onchange="this.form.submit()" class="status-select status-{{ topic['status'] }}">
+                                            <option value="pending" {{ 'selected' if topic['status']=='pending' }}>Pending</option>
+                                            <option value="in_progress" {{ 'selected' if topic['status']=='in_progress' }}>In Progress</option>
+                                            <option value="completed" {{ 'selected' if topic['status']=='completed' }}>Completed</option>
+                                            <option value="archived" {{ 'selected' if topic['status']=='archived' }}>Archived</option>
+                                        </select>
+                                    </form>
+                                </td>
+                                <td class="text-sm text-muted">{{ topic['tags'] or '—' }}</td>
+                                <td class="text-sm text-muted">{{ topic['created_at'][:10] }}</td>
+                                <td>
+                                    <form method="POST" action="/topics/{{ topic['id'] }}/delete" class="inline-form"
+                                          onsubmit="return confirm('Delete this topic?')">
+                                        <button type="submit" class="btn-icon btn-danger" title="Delete">&#10005;</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="empty-state">No topics yet. Add one above or send /add_topic via Telegram.</p>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</body>
+</html>

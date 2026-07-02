@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings — AI Content Agent</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">
+            <span class="logo-icon">&#9889;</span>
+            <span class="logo-text">ContentAgent</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">&#9632; Dashboard</a></li>
+            <li><a href="/topics">&#9733; Topics</a></li>
+            <li><a href="/posts">&#9782; Calendar</a></li>
+            <li><a href="/analytics">&#9783; Analytics</a></li>
+            <li><a href="/settings" class="active">&#9881; Settings</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <span class="status-dot online"></span> Bot Active
+        </div>
+    </nav>
+
+    <main class="content">
+        <header class="page-header">
+            <h1>Settings</h1>
+        </header>
+
+        <div class="card" style="max-width: 700px;">
+            <div class="card-header">
+                <h2>Configuration</h2>
+            </div>
+            <div class="card-body">
+                <div class="settings-section">
+                    <h3>Environment Variables</h3>
+                    <p class="text-muted text-sm">
+                        Settings are loaded from the <code>.env</code> file in the project root.
+                        Edit that file to change API keys and configuration.
+                    </p>
+                    <div class="env-list">
+                        <div class="env-item">
+                            <code>TELEGRAM_BOT_TOKEN</code>
+                            <span class="text-muted">Telegram bot authentication</span>
+                        </div>
+                        <div class="env-item">
+                            <code>AI_PROVIDER</code>
+                            <span class="text-muted">openai / anthropic / local</span>
+                        </div>
+                        <div class="env-item">
+                            <code>AI_API_KEY</code>
+                            <span class="text-muted">AI provider API key</span>
+                        </div>
+                        <div class="env-item">
+                            <code>AI_MODEL</code>
+                            <span class="text-muted">Model to use for generation</span>
+                        </div>
+                        <div class="env-item">
+                            <code>GITHUB_TOKEN</code>
+                            <span class="text-muted">GitHub API access</span>
+                        </div>
+                        <div class="env-item">
+                            <code>DASHBOARD_PORT</code>
+                            <span class="text-muted">Web dashboard port (default: 5000)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Quick Actions</h3>
+                    <div class="action-grid">
+                        <form method="POST" action="/settings">
+                            <button type="submit" class="btn btn-secondary">&#8635; Reset Activity Log</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>System Info</h3>
+                    <table class="data-table" style="max-width: 400px;">
+                        <tr>
+                            <td class="text-muted">Dashboard</td>
+                            <td>Running on port 5000</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Database</td>
+                            <td><code>data/content.db</code></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Bot</td>
+                            <td><span class="status-dot online"></span> Active</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,37 @@
+{
+  "github": {
+    "enabled": true,
+    "username": "ykrishhh"
+  },
+  "telegram": {
+    "enabled": false,
+    "bot_token": "",
+    "chat_id": ""
+  },
+  "email": {
+    "enabled": false,
+    "smtp_host": "smtp.gmail.com",
+    "smtp_port": 587,
+    "username": "",
+    "password": "",
+    "from_name": "ykrishhh"
+  },
+  "linkedin": {
+    "enabled": false,
+    "access_token": ""
+  },
+  "instagram": {
+    "enabled": false,
+    "access_token": ""
+  },
+  "scheduler": {
+    "enabled": true,
+    "check_interval_minutes": 30,
+    "auto_generate": true
+  },
+  "seo": {
+    "target_keyword_density": 2.5,
+    "min_readability_score": 60,
+    "min_word_count": 300
+  }
+}
